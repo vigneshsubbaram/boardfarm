@@ -51,9 +51,13 @@ def pre_boot_wan_clients(config, env_helper, devices):
     # should we run configure for all the wan devices? or just wan?
     for x in devices:
         # if isinstance(x, DebianWAN): # does not work for mitm
-        if hasattr(x, "name") and "wan" in x.name:
-            logger.info(f"Configuring {x.name}")
-            x.configure(config=config)
+        if hasattr(x, "name"):
+            if "wan" in x.name:
+                logger.info(f"Configuring {x.name}")
+                x.configure(config=config)
+            if "dns" in x.name:
+                logger.info(f"Configuring {x.name}")
+                x.setup_dnsmasq(config=config)
     # if more than 1 tftp server should we start them all?
     # currently starting the 1 being used
     logger.info(f"Starting TFTP server on {tftp_device.name}")
@@ -280,10 +284,7 @@ def post_boot_env(config, env_helper, devices):
             {"1": devices.fxs1.own_number, "2": devices.fxs2.own_number},
             "1234",
             devices.sipcenter.dns.url,
-            {
-                "1": devices.softphone.own_number,
-                "2": devices.softphone2.own_number,
-            },
+            "xxxx",  # TODO: this should come from the env.json
         )
         for fxs in devices.get_device_array("FXS"):
             if devices.sipcenter.fxs_endpoint_transport == "ipv6":

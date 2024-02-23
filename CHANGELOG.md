@@ -1,3 +1,42 @@
+## 2024.07.0 (2024-02-15)
+
+### Feat
+
+- **base_devices/board_templates.py**: added template for sw class
+
+### Fix
+
+- **use_cases/networking.py**: update anycpe to boardtemplate
+- **lib/booting.py**: update extra configure voice param
+
+## 2024.05.0 (2024-02-01)
+
+### Feat
+
+- **use_cases/voice.py**: add get_sip_expiry_time usecase
+- **devices/kamailio.py**: add get_sipserver_expire_timer implementation
+
+### Fix
+
+- **lib/voice.py**: update logic for sip trace
+- **use_cases/networking.py**: add sleep
+- **lib/voice.py**: update logic for sip trace
+
+## 2024.04.0 (2024-01-22)
+
+### Feat
+
+- **lib/common.py**: add install logic
+- **devices/linux.py**: add method to get secondary IPv4 address
+- **dns**: add support for external DNS servers
+- **env_helper**: add support for latest schema
+
+### Fix
+
+- **wifi_lib/manager.py**: fix the WLAN_options
+- **contingency_checks.py**: add none check on mode
+- **use_cases/networking.py**: fix Use Case
+
 ## 2023.50.0 (2023-12-12)
 
 ### Feat
