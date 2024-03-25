@@ -2,6 +2,7 @@
 
 This module consists of SIPcenterKamailio class.
 """
+
 import pathlib
 import re
 from typing import List, Union
@@ -110,8 +111,10 @@ EOF"""
         self.sendline("kamailio status")
         index = self.expect(["Listening on", "command not found"] + self.prompt)
         if index == 0:
+            self.expect(self.prompt)
             return "Running"
         elif index == 1:
+            self.expect(self.prompt)
             return "Not installed"
         return "Not Running"
 
@@ -183,16 +186,14 @@ EOF"""
         self.expect(self.prompt)
         return self.before
 
-    def sipserver_set_expire_timer(self, from_timer=180, to_timer=60):
+    def sipserver_set_expire_timer(self, to_timer=60):
         """Modify the call expires timer in kamailio.cfg
 
-        :param from_timer: Expire timer value change from
-        :type from_timer: int 'default to 180'
-        :param to_timer: Expire timer value change to
+        :param to_timer: Expire timer value to be changed to this value
         :type to_timer: int 'default to 60'
         """
         self.sendline(
-            f"""sed -i -e 's|"max_expires", {from_timer}|"max_expires", {to_timer}|' """
+            rf"""sed -i -e 's|"max_expires", [[:digit:]]\+|"max_expires", {to_timer}|' """
             + self.kamailio_cfg
         )
         self.expect(self.prompt)
@@ -278,12 +279,12 @@ EOF"""
             self.sendline(data)
         self.expect(self.prompt, timeout=50)
 
-    def get_sipserver_expire_timer(self) -> str:
+    def get_sipserver_expire_timer(self) -> int:
         """Get the call expire timer in kamailio.cfg.
 
-        :return: expiry timer saved in the config
-        :rtype: str
+        :return: expiry timer saved in the config or None if it is not found
+        :rtype: int
         """
-        self.sendline("grep 'max_expires'" + self.kamailio_cfg)
+        self.sendline("grep --colour=never 'max_expires' " + self.kamailio_cfg)
         self.expect(self.prompt)
-        return self.before
+        return int(self.before.split(sep=",")[-1].replace(")", "").strip())
