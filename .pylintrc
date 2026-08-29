@@ -9,9 +9,7 @@ extension-pkg-allow-list=
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code. (This is an alternative name to extension-pkg-allow-list
 # for backward compatibility.)
-extension-pkg-whitelist=pydantic
-# please refer this link to understand why pydantic has been added
-# https://github.com/samuelcolvin/pydantic/issues/1961
+extension-pkg-whitelist=
 
 # Return non-zero exit code if any of these messages/categories are detected,
 # even if score is above --fail-under value. Syntax same as enable. Messages
@@ -25,8 +23,8 @@ fail-under=10.0
 ignore=CVS
 
 # Add files or directories matching the regex patterns to the ignore-list. The
-# regex matches against paths.
-ignore-paths=
+# regex matches against paths and can be in Posix or Windows format.
+ignore-paths=unittests/*,integrationtests/*,scripts/*,automation/*
 
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths.
@@ -38,7 +36,7 @@ ignore-patterns=
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
-jobs=1
+jobs=0
 
 # Control the amount of potential inferred values when inferring a single
 # object. This can help the performance when dealing with large functions or
@@ -47,14 +45,14 @@ limit-inference-results=100
 
 # List of plugins (as comma separated values of python module names) to load,
 # usually to register additional checkers.
-load-plugins=
+load-plugins=pylint_per_file_ignores
 
 # Pickle collected data for later comparisons.
 persistent=yes
 
-# When enabled, pylint would attempt to guess common misconfiguration and emit
-# user-friendly hints instead of false-positive error messages.
-suggestion-mode=yes
+# Minimum Python version to use for version dependent checks. Will default to
+# the version used to run pylint.
+py-version=3.11
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
@@ -67,13 +65,6 @@ unsafe-load-any-extension=no
 # all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
 confidence=
 
-# Enable the message, report, category or checker with the given id(s). You can
-# either give multiple identifier separated by comma (,) or put this option
-# multiple time (only on the command line, not in the configuration file where
-# it should appear only once). See also the "--disable" option for examples.
-enable=F, E
-
-
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifiers separated by comma (,) or put this
 # option multiple times (only on the command line, not in the configuration
@@ -83,8 +74,13 @@ enable=F, E
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=C, R, W, E1101, E1205
+disable=W0511
 
+# Enable the message, report, category or checker with the given id(s). You can
+# either give multiple identifier separated by comma (,) or put this option
+# multiple time (only on the command line, not in the configuration file where
+# it should appear only once). See also the "--disable" option for examples.
+enable=c-extension-no-member
 
 
 [REPORTS]
@@ -115,7 +111,7 @@ score=yes
 [REFACTORING]
 
 # Maximum number of nested blocks for function / method body
-max-nested-blocks=5
+max-nested-blocks=3
 
 # Complete name of functions that never returns. When checking for
 # inconsistent-return-statements if a never returning function is called then
@@ -243,7 +239,8 @@ good-names=i,
            k,
            ex,
            Run,
-           _
+           _,
+           e
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
@@ -351,7 +348,7 @@ contextmanager-decorators=contextlib.contextmanager
 generated-members=
 
 # Tells whether missing members accessed in mixin class should be ignored. A
-# mixin class is detected if its name ends with "mixin" (case insensitive).
+# class is considered mixin if its name matches the mixin-class-rgx option.
 ignore-mixin-members=yes
 
 # Tells whether to warn about missing members when the owner of the attribute
@@ -389,6 +386,10 @@ missing-member-hint-distance=1
 # showing a hint for a missing member.
 missing-member-max-choices=1
 
+# Regex pattern to define which classes are considered mixins ignore-mixin-
+# members is set to 'yes'
+mixin-class-rgx=.*[Mm]ixin
+
 # List of decorators that change the signature of a decorated function.
 signature-mutators=
 
@@ -412,7 +413,7 @@ indent-string='    '
 max-line-length=100
 
 # Maximum number of lines in a module.
-max-module-lines=1000
+max-module-lines=2000
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.
@@ -425,26 +426,37 @@ single-line-if-stmt=no
 
 [SIMILARITIES]
 
-# Ignore comments when computing similarities.
+# Comments are removed from the similarity computation
 ignore-comments=yes
 
-# Ignore docstrings when computing similarities.
+# Docstrings are removed from the similarity computation
 ignore-docstrings=yes
 
-# Ignore imports when computing similarities.
-ignore-imports=no
+# Imports are removed from the similarity computation
+ignore-imports=yes
 
-# Ignore function signatures when computing similarities.
+# Signatures are removed from the similarity computation
 ignore-signatures=no
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+min-similarity-lines=10
 
 
 [DESIGN]
 
+# List of regular expressions of class ancestor names to ignore when counting
+# public methods (see R0903)
+# pydantic request/response models are pure schema declarations and correctly
+# expose no public methods of their own.
+exclude-too-few-public-methods=pydantic.*BaseModel
+
+# List of qualified class names to ignore when counting class parents (see
+# R0901)
+ignored-parents=
+
 # Maximum number of arguments for function / method.
-max-args=5
+max-args=17
+max-positional-arguments=17
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=7
@@ -465,10 +477,10 @@ max-parents=7
 max-public-methods=20
 
 # Maximum number of return / yield for function / method body.
-max-returns=6
+max-returns=3
 
 # Maximum number of statements in function / method body.
-max-statements=50
+max-statements=40
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=2
@@ -544,6 +556,6 @@ valid-metaclass-classmethod-first-arg=cls
 [EXCEPTIONS]
 
 # Exceptions that will emit a warning when being caught. Defaults to
-# "BaseException, Exception".
-overgeneral-exceptions=BaseException,
-                       Exception
+# "builtins.BaseException, builtins.Exception".
+overgeneral-exceptions=builtins.BaseException,
+                       builtins.Exception

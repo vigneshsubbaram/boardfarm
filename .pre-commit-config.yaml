@@ -3,60 +3,62 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
     - repo: https://github.com/commitizen-tools/commitizen
-      rev: v2.29.2
+      rev: v4.9.0
       hooks:
           - id: commitizen
             stages: [commit-msg]
+            additional_dependencies: [deprecated]
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.3.0
+      rev: v6.0.0
       hooks:
           - id: check-ast
-            stages: [commit]
+            stages: [pre-commit]
           - id: end-of-file-fixer
-            stages: [commit]
+            stages: [pre-commit]
           - id: mixed-line-ending
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-toml
-            stages: [commit]
+            stages: [pre-commit]
           - id: trailing-whitespace
             exclude: cm-cfg
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-docstring-first
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-yaml
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-json
-            stages: [commit]
+            stages: [pre-commit]
           - id: pretty-format-json
             args: [--autofix, --indent=4]
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-added-large-files
-            stages: [commit]
+            stages: [pre-commit]
+            args: [--maxkb=25600]
           - id: requirements-txt-fixer
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-merge-conflict
-            stages: [commit]
+            stages: [pre-commit]
           - id: debug-statements
-            stages: [commit]
+            stages: [pre-commit]
           - id: check-executables-have-shebangs
             language: python
             files: \.py$
-            stages: [commit]
+            stages: [pre-commit]
     - repo: https://github.com/Lucas-C/pre-commit-hooks
-      rev: v1.3.0
+      rev: v1.5.5
       hooks:
           - id: remove-crlf
-            stages: [commit]
+            stages: [pre-commit]
           - id: remove-tabs
-            exclude: cm-cfg
-            stages: [commit]
+            exclude: cm-cfg|docs/Makefile
+            stages: [pre-commit]
           - id: forbid-crlf
-            stages: [commit]
+            stages: [pre-commit]
           - id: forbid-tabs
-            exclude: cm-cfg
-            stages: [commit]
+            exclude: cm-cfg|docs/Makefile
+            stages: [pre-commit]
     - repo: https://github.com/myint/eradicate
-      rev: v2.1.0
+      rev: 3.0.0
       hooks:
           - id: eradicate
             name: eradicate
@@ -65,68 +67,63 @@ repos:
             language: python
             files: \.py$
             args: [--in-place]
-            stages: [commit]
-    - repo: https://github.com/timothycrosley/isort
-      rev: 5.12.0
-      hooks:
-          - id: isort
-            name: isort
-            entry: isort
-            require_serial: true
-            language: python
-            types: [python]
-            stages: [commit]
+            stages: [pre-commit]
     - repo: https://github.com/asottile/pyupgrade
-      rev: v2.37.3
+      rev: v3.20.0
       hooks:
           - id: pyupgrade
-            args: [--py36-plus]
-            stages: [commit]
+            args: [--py39-plus]
+            stages: [pre-commit]
     - repo: https://github.com/ikamensh/flynt/
-      rev: '0.76'
+      rev: 1.0.6
       hooks:
           - id: flynt
-            stages: [commit]
-    - repo: https://github.com/psf/black
-      rev: 22.6.0
+            stages: [pre-commit]
+    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+      rev: 0.2.3
       hooks:
-          - id: black
-            description: 'Black: The uncompromising Python code formatter'
-            args: [--safe]
-            stages: [commit]
-    - repo: https://github.com/pycqa/flake8
-      rev: 3.9.2
+          - id: yamlfmt
+            stages: [pre-commit]
+            exclude: |
+                (?x)^(
+                  unittests/lib/docker_factory/.*\.yml$
+                )$
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.37.1
       hooks:
-          - id: flake8
-            additional_dependencies:
-                - flake8-docstrings
-                - flake8-rst
-                - flake8-rst-docstrings
-                - flake8-bugbear
-            stages: [commit]
+          - id: yamllint
+            args: [--format, parsable, --strict]
+            stages: [pre-commit]
+            exclude: |
+                (?x)^(
+                  unittests/lib/docker_factory/.*\.yml$
+                )$
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      # Ruff version.
+      rev: v0.13.0
+      hooks:
+          - id: ruff
+            # https://docs.astral.sh/ruff/formatter/#sorting-imports
+            args: [check, --select, I, --fix, --diff]
+            name: ruff-isort
+            stages: [pre-commit]
+          - id: ruff-format
+            args: [--diff]
+            stages: [pre-commit]
+          - id: ruff
+            stages: [pre-commit]
+    - repo: https://github.com/akaihola/darglint2
+      rev: v1.8.2
+      hooks:
+          - id: darglint2
+            args: [boardfarm3]
+            stages: [pre-commit]
     - repo: local
       hooks:
-          - id: pylint
-            name: pylint
-            entry: pylint
+          - id: nox
+            name: nox
+            entry: nox
             language: system
+            stages: [pre-push]
+            pass_filenames: false
             types: [python]
-            args: [-rn, -sn]
-          - id: unittests
-            name: unittests
-            entry: pytest
-            language: python
-            pass_filenames: false
-            args: [--disable-warnings, -r N, unittests]
-            stages: [push]
-            verbose: true
-    - repo: local
-      hooks:
-          - id: integrationtests
-            name: integrationtests
-            entry: pytest
-            language: python
-            pass_filenames: false
-            args: [--disable-warnings, -r N, integrationtests]
-            stages: [push]
-            verbose: true

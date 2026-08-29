@@ -17,29 +17,10 @@ exclude =
     scripts,
     # virtual environments
     .venv,
-    venv,
-    # boardfarm project specific
-    boardfarm/__init__.py,
-    boardfarm/bft,
-    boardfarm/arguments.py,
-    boardfarm/Boardfarm.py,
-    boardfarm/config.py,
-    boardfarm/exceptions.py,
-    boardfarm/library.py,
-    boardfarm/logging_config.py,
-    boardfarm/make_human_readable.py,
-    boardfarm/orchestration.py,
-    boardfarm/plugins.py,
-    boardfarm/analysis/*,
-    boardfarm/dbclients/*,
-    boardfarm/devices/*,
-    boardfarm/lib/*,
-    ; boardfarm/tests*,
-    *tests/*,
-    scripts/*,
-
+    venv
+max-complexity = 10
 max-line-length = 88
-extend-ignore = E203, E501, B028, B017
+extend-ignore = DAR, E203, E501, W503
 rst-roles =
     class,
     func,
@@ -47,3 +28,11 @@ rst-roles =
 rst-directives =
     envvar,
     exception,
+
+# darglint options
+docstring_style=sphinx
+
+per-file-ignores =
+    unittests/*:D103, E501
+    boardfarm3/api/execution.py:A003
+    unittests/control/test_launcher.py:A003, D103, E501

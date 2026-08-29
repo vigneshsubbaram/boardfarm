@@ -1,7 +1,9 @@
 """Lint and test boardfarm on multiple python environments."""
+
 import nox
 
-_PYTHON_VERSIONS = ["3.9"]
+_PYTHON_VERSIONS = ["3.11"]
+
 # Fail nox session when run a program which
 # is not installed in its virtualenv
 nox.options.error_on_external_run = True
@@ -9,33 +11,54 @@ nox.options.error_on_external_run = True
 
 @nox.session(python=_PYTHON_VERSIONS)
 def lint(session: nox.Session) -> None:
-    """Lint boardfarm."""
-    session.install("--upgrade", "pip")
-    session.install("--upgrade", "pip", "wheel")
-    session.install("--upgrade", "pip", "wheel", ".[dev]")
-    session.run("black", ".", "--check")
-    session.run("isort", ".", "--check-only")
-    session.run("flake8", "boardfarm")
+    """Lint boardfarm.
+
+    # noqa: DAR101
+    """
+    session.install("--upgrade", ".[dev,api]")
+    session.run("ruff", "format", "--check", ".")
+    session.run("ruff", "check", ".")
+    session.run("flake8", ".")
+    session.run("mypy", "boardfarm3")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
 def pylint(session: nox.Session) -> None:
-    """Lint boardfarm using pylint without dev dependencies."""
-    session.install("--upgrade", "pip")
-    session.install("--upgrade", "pip", "wheel")
-    session.install("--upgrade", "pip", "wheel", ".", "pylint")
-    # FIXME: boardfarm-lgi-shared is needed because boardfarm imports,
-    # but it should not be a dependency, as it creates a cycle.
-    session.install("--upgrade", "pip", "wheel", ".", "pylint", "boardfarm-lgi-shared")
-    session.run("pylint", "boardfarm")
+    """Lint boardfarm using pylint without dev dependencies.
+
+    # noqa: DAR101
+    """
+    session.install("--upgrade", ".[api]", "pylint", "pylint-per-file-ignores")
+    session.run("pylint", "boardfarm3")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
 def test(session: nox.Session) -> None:
-    """Test boardfarm."""
-    session.install("--upgrade", "pip")
-    session.install("--upgrade", "pip", "wheel")
-    # FIXME: boardfarm-lgi-shared is needed because boardfarm imports,
-    # but it should not be a dependency, as it creates a cycle.
-    session.install("--upgrade", "pip", "wheel", ".[test]", "boardfarm-lgi-shared")
+    """Test boardfarm.
+
+    # noqa: DAR101
+    """
+    session.install("--upgrade", ".[test,api]")
     session.run("pytest", "unittests")
+
+
+@nox.session(python=_PYTHON_VERSIONS)
+def integration(session: nox.Session) -> None:
+    """Run control-plane integration tests against live agent subprocesses.
+
+    # noqa: DAR101
+    """
+    session.install("--upgrade", ".[test,api]", "./control")
+    session.run("pytest", "integrationtests", "-v")
+
+
+@nox.session(python=_PYTHON_VERSIONS)
+def boardfarm_help(session: nox.Session) -> None:
+    """Execute boardfarm --help.
+
+    This helps identifying integration issues with the plugins/devices.
+
+    # noqa: DAR101
+    """
+    session.install("--upgrade", "-e", ".")
+    session.run("boardfarm", "--help")
